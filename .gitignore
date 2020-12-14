@@ -6,4 +6,5 @@ manipulation_copy.py
 test.py
 check.py
 venv/
+.vscode/settings.json
 
