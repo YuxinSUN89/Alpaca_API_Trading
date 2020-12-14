@@ -1,5 +1,7 @@
 log/
 caogao.py
+.vscode
+__pycache__
 error message.png
 manipulation_copy.py
 test.py
