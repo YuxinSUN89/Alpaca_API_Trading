@@ -17,19 +17,18 @@ api = tradeapi.REST(API_KEY,
                     SECRET_KEY,
                     'https://paper-api.alpaca.markets')
 ```
-Then, list the stocks you want to trade in 
+Then, list the individual stocks and the number of shares you want to buy for each trade (the example here is to buy more shares for small-cap stocks and less shares for large-cap stocks)
 ```python
-symbols = ['AA', 'AAL', 'UAL', 'NIO', 'AMD', 'NCLH', 'BYND', 'DAL', 'ATVI', 'WORK', 'VIRT', 'AAPL', 'AMC', 'TSLA']
+loading = {'AA': 300, 'AAL': 300, 'UAL': 300, 'NIO': 250, 'AMD': 300, 'NCLH': 200, 'BYND': 200, 'DAL': 500, 'ATVI': 300,
+        'WORK': 200, 'VIRT': 200, 'AAPL': 300, 'AMC': 200, 'TSLA': 80, 'NKLA': 180, 'XPEV': 100, 'NVDA': 50,
+           'LMT': 80, 'ZM': 80, 'DOCU': 100, 'TWLO': 100, 'CRWD': 100, 'EAR': 80, 'SNOW': 80, 'TWTR': 400, 'EA': 250,
+           'ABBV': 200, 'CRSR': 1000, 'PFE': 500, 'PDD': 200, 'LI': 200, 'DISCK':80 }
 ```
-and number of shares you want to purchase each time (the example here is to buy more shares for small-cap stocks and less shares for large-cap stocks)
+and also create a list for stock symbols
 ```python
-loading = {
-    'AA': 100,
-    'AAL': 100,
-    ... 
-    'AMC': 200,
-    'TSLA': 40}
+symbols = list(loading)
 ```
+
 Last, set the slow and fast moving average and time frequency data for your dataframe.
 ```python
 slow = 20
@@ -44,13 +43,13 @@ In StockInfo class, dataframe will be created such as :
 Based on indicators in dataframe, trading signals can be created as  
 ```python
 signals = {
-    'AA': 100,
+    'AA': 300,
     'AAL': 0,
     ... 
     'AMC': 0,
-    'TSLA': -40}
+    'TSLA': -80}
 ```
-This signal suggests to buy 100 shares of AA and liquidate 40 shares of TSLA.
+This signal suggests to buy 300 shares of AA and liquidate 80 shares of TSLA.
 **Again, make sure to add you own indicators in dataframe.**
 
 ## Start trading
