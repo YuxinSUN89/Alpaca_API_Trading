@@ -7,4 +7,6 @@ test.py
 check.py
 venv/
 .vscode/settings.json
+trading.log
+config.py
 
