@@ -12,7 +12,7 @@ import pandas as pd
 
 pd.options.display.max_rows = 999
 pd.set_option('display.max_columns', None)
-import time
+import timegit remote add origin https://github.com/YuxinSUN89/Alpaca_API_Trading.git
 #from datetime import datetime
 from datetime import timedelta
 
