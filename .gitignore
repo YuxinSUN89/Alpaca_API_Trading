@@ -1,10 +1,11 @@
 log/
 caogao.py
-.vscode
-__pycache__
+.vscode/
+__pycache__/
+ *.pyc
 error message.png
 manipulation_copy.py
 test.py
 check.py
-/venv
+venv/
 
