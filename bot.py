@@ -59,6 +59,11 @@ def get_data_bars(symbols, rate, slow, fast):
             data.loc[:, (x, 'slow_ema_20min')] = data[x]['close'].rolling(window=slow).mean()
             data.loc[:, (x, 'return_1_min')] = (data[x]['close']- data[x]['close'].shift(1))/(data[x]['close'].shift(1))
             data.loc[:, (x, 'diff')] = data[x]['slow_ema_20min'] - data[x]['fast_ema_1min']
+<<<<<<< HEAD
+=======
+            data.loc[:, (x, 'return_2_min')] = data[x]['return_1_min'].shift(1)
+            data.loc[:, (x, 'return_3_min')] = data[x]['return_2_min'].shift(1)
+>>>>>>> ed2145a2c3f2305bc115dc7fd22efb5092a7d4dd
             data.loc[:, (x, 'loading')] = int(loading[x])
 
             if x in ticker:
