@@ -1,5 +1,5 @@
-#API_KEY = "PK1709J00JEC37H8DELC"
-#SECRET_KEY = "hFlPT1y7dnIXQwXGDCDm08aLPeujl5nL/inRqbRW"
+API_KEY = "<你的API KEY>"
+SECRET_KEY = "<你的SECRET KEY>"
 
 import datetime
 import time
@@ -18,8 +18,8 @@ from pytz import timezone
 
 tz = timezone('EST')
 
-api = tradeapi.REST(config.API_KEY,
-                    config.SECRET_KEY,
+api = tradeapi.REST(API_KEY,
+                    SECRET_KEY,
                     'https://paper-api.alpaca.markets')
 
 import logging
@@ -27,7 +27,10 @@ import logging
 #----Frequency-----#
 freq = '1Min'
 
-# Try those two
+#----Moving average-----#
+slow = 20
+fast = 1
+
 account = api.get_account()
 api.list_positions()
 
@@ -53,17 +56,12 @@ def get_data_bars(symbols, rate, slow, fast):
         my_position = dict(zip(ticker, qty))
         entry_price = dict(zip(ticker, avg_entry_price))
 
-        for x in (list(loading)):
+        for x in symbols:
 
             data.loc[:, (x, 'fast_ema_1min')] = data[x]['close'].rolling(window=fast).mean()
             data.loc[:, (x, 'slow_ema_20min')] = data[x]['close'].rolling(window=slow).mean()
             data.loc[:, (x, 'return_1_min')] = (data[x]['close']- data[x]['close'].shift(1))/(data[x]['close'].shift(1))
             data.loc[:, (x, 'diff')] = data[x]['slow_ema_20min'] - data[x]['fast_ema_1min']
-<<<<<<< HEAD
-=======
-            data.loc[:, (x, 'return_2_min')] = data[x]['return_1_min'].shift(1)
-            data.loc[:, (x, 'return_3_min')] = data[x]['return_2_min'].shift(1)
->>>>>>> ed2145a2c3f2305bc115dc7fd22efb5092a7d4dd
             data.loc[:, (x, 'loading')] = int(loading[x])
 
             if x in ticker:
@@ -75,10 +73,12 @@ def get_data_bars(symbols, rate, slow, fast):
 
             data.loc[:, (x, 'profit_change')] = (data[x]['close'] - data[x]['entry_price']) / (data[x]['entry_price'])
             data.loc[:, (x, 'PL')] = (data[x]['close'] - data[x]['entry_price']) * (data[x]['qty'])
+
+        data.fillna(method='ffill', inplace=True)
+        return data
     except:
         print("There might be connection errors")
         pass
-
 #create signals #
 def get_signal_bars(symbol_list, rate, ema_slow, ema_fast):
     now = datetime.datetime.now()
@@ -114,7 +114,7 @@ def run_checker(stocklist):
             # Checks market is open
             print('Trading in process '+ datetime.datetime.now().strftime("%x %X"))
             if datetime.datetime.now(tz).time() > datetime.time(8,30) and datetime.datetime.now(tz).time() <= datetime.time(15, 00):
-                signals = get_signal_bars(stocklist, freq, 20, 1)
+                signals = get_signal_bars(stocklist, freq, slow, fast)
                 for signal in signals:
                     if signals[signal] > 0:
                         # [x.symbol for x in api.list_positions()] collect all stock tickers
