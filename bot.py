@@ -3,10 +3,8 @@
 
 import datetime
 import time
-# from threading import Timer
 
 import alpaca_trade_api as tradeapi
-import config
 import numpy as np
 import pandas as pd
 
@@ -25,7 +23,7 @@ api = tradeapi.REST(config.API_KEY,
                     'https://paper-api.alpaca.markets')
 
 import logging
- 
+
 #----Frequency-----#
 freq = '1Min'
 
@@ -61,8 +59,6 @@ def get_data_bars(symbols, rate, slow, fast):
             data.loc[:, (x, 'slow_ema_20min')] = data[x]['close'].rolling(window=slow).mean()
             data.loc[:, (x, 'return_1_min')] = (data[x]['close']- data[x]['close'].shift(1))/(data[x]['close'].shift(1))
             data.loc[:, (x, 'diff')] = data[x]['slow_ema_20min'] - data[x]['fast_ema_1min']
-            data.loc[:, (x, 'return_2_min')] = data[x]['return_1_min'].shift(1)
-            data.loc[:, (x, 'return_3_min')] = data[x]['return_2_min'].shift(1)
             data.loc[:, (x, 'loading')] = int(loading[x])
 
             if x in ticker:
@@ -74,12 +70,6 @@ def get_data_bars(symbols, rate, slow, fast):
 
             data.loc[:, (x, 'profit_change')] = (data[x]['close'] - data[x]['entry_price']) / (data[x]['entry_price'])
             data.loc[:, (x, 'PL')] = (data[x]['close'] - data[x]['entry_price']) * (data[x]['qty'])
-
-            ## Fill missing values ###
-            # data[data.loc[:, (x, 'diff')]==""] = np.NaN
-        data.fillna(method='ffill', inplace=True)
-        return data
-        data.to_csv('out.csv', index=False)
     except:
         print("There might be connection errors")
         pass
@@ -89,65 +79,14 @@ def get_signal_bars(symbol_list, rate, ema_slow, ema_fast):
     now = datetime.datetime.now()
     data = get_data_bars(symbol_list, rate, ema_slow, ema_fast)
 
-#    port_value = float(api.get_account().equity)
-#    port_values = []
-#    port_values = port_values + [port_value]
-#    adjustment = (port_value - max(port_values))/port_value   # Portfolio values #
-
     signals = {}
     for x in symbol_list:   # iloc[-1] means last observation, like shift() #
-        attempts = 10
-        while True:
-            try:
+        if (data[x].iloc[-1]['fast_ema_1min'] >= data[x].iloc[-1]['slow_ema_20min']):
+            signal = (data[x].iloc[-1]['loading'])
 
-                if datetime.datetime.now(tz).time() > datetime.time(14, 58):
-                    signal = (data[x].iloc[-1]['qty']) * (-1)
-                    print('Trading Day end ' + datetime.datetime.now().strftime("%x %X") + ' Flat positions')
-                    logging.warning('{} Trading Day end. Unload my positions'.format(datetime.datetime.now(tz).strftime("%x %X")))
-
-                # Buy-in signal
-                elif (data[x].iloc[-1]['diff'] != '' and data[x].iloc[-1]['diff'] <= 0.3 and data[x].iloc[-1]['diff'] > 0
-                      and data[x].iloc[-1]['return_1_min'] != '' and data[x].iloc[-1]['return_1_min'] >=0.001
-                      and data[x].iloc[-1]['return_2_min'] != '' and data[x].iloc[-1]['return_2_min'] >=0.001
-                      and data[x].iloc[-1]['return_3_min'] != '' and data[x].iloc[-1]['return_3_min'] >=0.001 and data[x].iloc[-1]['qty'] == 0):
-                    signal = (data[x].iloc[-1]['loading'])
-
-                elif (data[x].iloc[-1]['diff'] != '' and data[x].iloc[-1]['diff'] <= 0.5 and data[x].iloc[-1]['diff'] > 0
-                      and data[x].iloc[-1]['return_1_min'] != '' and data[x].iloc[-1]['return_1_min'] >=0.001
-                      and data[x].iloc[-1]['return_2_min'] != '' and data[x].iloc[-1]['return_2_min'] >=0.001
-                      and data[x].iloc[-1]['qty'] == 0):
-                    signal = (data[x].iloc[-1]['loading'])
-
-                # Sell-out signal
-                elif (data[x].iloc[-1]['diff'] != '' and data[x].iloc[-1]['diff'] >= -0.3 and data[x].iloc[-1]['diff'] < 0
-                      and data[x].iloc[-1]['return_1_min'] != '' and data[x].iloc[-1]['return_1_min'] <0
-                      and data[x].iloc[-1]['return_2_min'] != '' and data[x].iloc[-1]['return_2_min'] <0
-                      and data[x].iloc[-1]['return_3_min'] != '' and data[x].iloc[-1]['return_3_min'] <0):
-                    signal = (data[x].iloc[-1]['qty'])*(-1)
-
-                # Sell-out signal - number of shares to be liquidated is the value of signal and STOP LOSS
-                elif ((data[x].iloc[-1]['PL']>=1500) or (data[x].iloc[-1]['PL']<=-500)):
-                    signal = (data[x].iloc[-1]['qty'])*(-1)
-
-                #STOP LOSS
-                #(data[x].iloc[-1]['diff'] >= -0.3 and data[x].iloc[-1]['diff'] < 0 and data[x].iloc[-1]['return_1_min'] <0 \
-                #        and data[x].iloc[-1]['return_2_min'] <0 and data[x].iloc[-1]['return_3_min'] <0) or
-                #    signal = (data[x].iloc[-1]['qty'])*(-1)
-
-                #Lock in profit
-                elif data[x].iloc[-1]['profit_change'] >= 0.04:
-                    signal = data[x].iloc[-1]['qty']*(-1)
-
-                # Flat my positions by the end of the day.
-                else:
-                    signal = 0
-            except TypeError:
-                attempts -= 1
-                time.sleep(2)
-                continue
-            except:
-                print(traceback.format_exc())
-            break
+        # Sell-out signal - number of shares to be liquidated is the value of signal
+        else:
+            signal = (data[x].iloc[-1]['qty'])*(-1)
         signals[x] = signal
 
     return signals
@@ -194,7 +133,7 @@ def run_checker(stocklist):
                             # print('No sell', signal, e)
                             pass
                         # except ConnectionError:
-                        #     print("There might be connection error")
+ 
                     #print("This loop done !")
                 time.sleep(60)
 
