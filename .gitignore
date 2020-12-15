@@ -1,12 +1,14 @@
-log/
+log
 caogao.py
-.vscode/
+.vscode
 error message.png
 manipulation_copy.py
 test.py
 check.py
-venv/
+venv
 .vscode/settings.json
 trading.log
 config.py
+images
+
 
