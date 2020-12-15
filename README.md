@@ -40,7 +40,20 @@ freq = '1Min'
 In StockInfo class, dataframe will be created such as :
 ![](images/dataframe.png)
 
-Based on indicators in dataframe, trading signals can be created as  
+## Creating singals
+Simple moving average signals can be create here. 
+```python
+    signals = {}
+    for x in symbol_list:   # iloc[-1] means last observation, like shift() #
+        if (data[x].iloc[-1]['fast_ema_1min'] >= data[x].iloc[-1]['slow_ema_20min']):
+            signal = (data[x].iloc[-1]['loading'])
+
+        # Sell-out signal - number of shares to be liquidated is the value of signal
+        else:
+            signal = (data[x].iloc[-1]['qty'])*(-1)
+        signals[x] = signal
+```
+Based on indicators in dataframe, if fast moving average goes above or equals slow moving average, then generate a buy signal. Otherwise, generate a sell signal. Trading signal list will be created as  
 ```python
 signals = {
     'AA': 300,

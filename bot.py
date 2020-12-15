@@ -31,9 +31,6 @@ freq = '1Min'
 slow = 20
 fast = 1
 
-account = api.get_account()
-api.list_positions()
-
 #select stock and BUY NUMBER FOR EACH PURCHASE #
 loading = {'AA': 300, 'AAL': 300, 'UAL': 300, 'NIO': 250, 'AMD': 300, 'NCLH': 200, 'BYND': 200, 'DAL': 500, 'ATVI': 300,
         'WORK': 200, 'VIRT': 200, 'AAPL': 300, 'AMC': 200, 'TSLA': 80, 'NKLA': 180, 'XPEV': 100, 'NVDA': 50,
@@ -81,7 +78,6 @@ def get_data_bars(symbols, rate, slow, fast):
         pass
 #create signals #
 def get_signal_bars(symbol_list, rate, ema_slow, ema_fast):
-    now = datetime.datetime.now()
     data = get_data_bars(symbol_list, rate, ema_slow, ema_fast)
 
     signals = {}
