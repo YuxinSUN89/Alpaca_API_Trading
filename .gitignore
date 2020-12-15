@@ -10,5 +10,6 @@ venv
 trading.log
 config.py
 images
+check.py
 
 
